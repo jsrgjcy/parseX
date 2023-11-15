@@ -5,7 +5,7 @@ target/
 !**/src/test/**
 
 
-*SqlParseTest*
+
 ### STS ###
 .apt_generated
 .classpath
