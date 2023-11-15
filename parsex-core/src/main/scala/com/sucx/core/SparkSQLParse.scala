@@ -1,9 +1,9 @@
 package com.sucx.core
 
 import java.util.{HashSet => JSet}
-
 import com.sucx.common.enums.OperatorType
 import com.sucx.common.model.TableInfo
+import org.apache.hadoop.hive.metastore.api.FieldSchema
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.catalyst.catalog.UnresolvedCatalogRelation
@@ -13,7 +13,9 @@ import org.apache.spark.sql.execution.command._
 import org.apache.spark.sql.execution.datasources.{CreateTable, RefreshTable}
 import org.apache.spark.sql.internal.SQLConf
 
+import java.util
 import scala.collection.JavaConversions._
+import scala.collection.{immutable, mutable}
 
 class SparkSQLParse extends AbstractSqlParse {
 
@@ -164,7 +166,11 @@ class SparkSQLParse extends AbstractSqlParse {
         } else if (childInputTables.size() == 1) {
           val tableInfo: TableInfo = childInputTables.iterator().next()
           tableAliaMap.put(project.alias, tableInfo.getDbName + "." + tableInfo.getName)
-          inputTables.add(new TableInfo(tableInfo.getName, tableInfo.getDbName, tableInfo.getType, splitColumn(tableInfo.getColumns, tableAliaMap)))
+
+          import scala.collection.JavaConverters._
+          val columns = splitColumn(tableInfo.getColumns.map(i => i.getName), tableAliaMap).asScala.map(c => new FieldSchema(c, "string", "")).toSet
+          tableInfo.setColumns(columns)
+          inputTables.add(tableInfo)
         }
         tmpTables.add(buildTableInfo(project.alias, this.currentDb, OperatorType.READ))
 

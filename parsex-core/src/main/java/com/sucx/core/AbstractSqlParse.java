@@ -7,6 +7,7 @@ import com.sucx.common.model.Result;
 import com.sucx.common.model.TableInfo;
 import com.sucx.common.util.Pair;
 import com.sucx.common.util.StringUtils;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.log4j.Logger;
 import scala.Tuple3;
 
@@ -68,13 +69,15 @@ public abstract class AbstractSqlParse implements SqlParse {
 
 
     protected TableInfo buildTableInfo(String name, String db, OperatorType type) {
-        TableInfo info = new TableInfo(name, db, type, splitColumn(getColumnsTop(), tableAliaMap));
+        HashSet columns = (HashSet<FieldSchema>) splitColumn(getColumnsTop(), tableAliaMap).stream().map(c -> new FieldSchema(c, "string", "")).collect(Collectors.toSet());
+        TableInfo info = new TableInfo(name, db, type, columns);
         info.setLimit(getLimitTop());
         return info;
     }
 
     protected TableInfo buildTableInfo(String dbAndTable, OperatorType type) {
-        TableInfo info = new TableInfo(dbAndTable, type, currentDb, splitColumn(getColumnsTop(), tableAliaMap));
+        HashSet columns = (HashSet<FieldSchema>) splitColumn(getColumnsTop(), tableAliaMap).stream().map(c -> new FieldSchema(c, "string", "")).collect(Collectors.toSet());
+        TableInfo info = new TableInfo(dbAndTable, type, currentDb, columns);
         info.setLimit(getLimitTop());
         return info;
     }

@@ -4,6 +4,7 @@ import com.sucx.common.Constants;
 import com.sucx.common.enums.OperatorType;
 import com.sucx.common.util.Pair;
 import com.sucx.common.util.StringUtils;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class TableInfo {
 
     private OperatorType type;
 
-    private Set<String> columns;
+    private Set<FieldSchema> columns;
 
     private String limit;
 
@@ -38,7 +39,8 @@ public class TableInfo {
     private boolean isDb;
 
 
-    public TableInfo(){}
+    public TableInfo() {
+    }
 
 
     public TableInfo(String dbName, OperatorType type) {
@@ -47,7 +49,7 @@ public class TableInfo {
         this.isDb = true;
     }
 
-    public TableInfo(String name, String dbName, OperatorType type, HashSet<String> columns) {
+    public TableInfo(String name, String dbName, OperatorType type, Set<FieldSchema> columns) {
         this.name = name;
         this.dbName = dbName;
         this.type = type;
@@ -56,7 +58,7 @@ public class TableInfo {
         optimizeColumn();
     }
 
-    public TableInfo(String dbAndTableName, OperatorType type, String defaultDb, HashSet<String> columns) {
+    public TableInfo(String dbAndTableName, OperatorType type, String defaultDb, HashSet<FieldSchema> columns) {
         if (dbAndTableName.contains(Constants.POINT)) {
             Pair<String, String> pair = StringUtils.getPointPair(dbAndTableName);
             this.name = pair.getRight();
@@ -71,21 +73,25 @@ public class TableInfo {
         optimizeColumn();
     }
 
+    public void setColumns(Set<FieldSchema> columns) {
+        this.columns = columns;
+    }
 
-    public Set<String> getColumns() {
+    public Set<FieldSchema> getColumns() {
         return columns;
     }
 
     private void optimizeColumn() {
         String dbAndName = this.dbName + Constants.POINT + this.name;
         this.columns = this.columns.stream().map(column -> {
-            if (!selectAll && column.endsWith("*")) {
+            if (!selectAll && column.getName().endsWith("*")) {
                 selectAll = true;
             }
-            if (column.contains(Constants.POINT)) {
-                Pair<String, String> pair = StringUtils.getLastPointPair(column);
+            if (column.getName().contains(Constants.POINT)) {
+                Pair<String, String> pair = StringUtils.getLastPointPair(column.getName());
                 if (pair.getLeft().equals(dbAndName)) {
-                    return pair.getRight();
+                    column.setName(pair.getRight());
+                    return column;
                 }
             }
             return column;
@@ -134,7 +140,11 @@ public class TableInfo {
 
         if (this.columns != null && this.columns.size() > 0) {
             str.append(" column[ ");
-            this.columns.forEach(columns -> str.append(columns).append(" "));
+            this.columns.forEach(columns ->
+            {
+                String colStr = "(name:" + columns.getName() + ",type:" + columns.getType() + ",comment:" + columns.getComment() + ")";
+                str.append(colStr).append(",");
+            });
             str.append("]");
         }
         if (limit != null) {

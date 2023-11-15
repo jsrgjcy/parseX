@@ -4,6 +4,7 @@ import com.sucx.common.Constants;
 import com.sucx.common.enums.OperatorType;
 import com.sucx.common.exceptions.SqlParseException;
 import com.sucx.common.model.TableInfo;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.ql.lib.*;
 import org.apache.hadoop.hive.ql.parse.*;
 import scala.Tuple3;
@@ -41,7 +42,17 @@ public class HiveSQLParse extends AbstractSqlParse implements NodeProcessor {
             //create语句
             case HiveParser.TOK_CREATETABLE: {
                 String tableName = BaseSemanticAnalyzer.getUnescapedName((ASTNode) ast.getChild(0));
-                outputTableList.add(new TableInfo(tableName, OperatorType.CREATE, currentDb, new HashSet<>()));
+
+                // modify by jucongying 20220524
+                HashSet columns = new HashSet<FieldSchema>();
+                try {
+                    List<FieldSchema> fields = BaseSemanticAnalyzer.getColumns((ASTNode) ast.getChild(3), false);
+                    fields.forEach(i -> columns.add(i));
+                } catch (SemanticException e) {
+                    throw new RuntimeException(e);
+                }
+
+                outputTableList.add(new TableInfo(tableName, OperatorType.CREATE, currentDb, columns));
                 break;
             }
             //insert语句
