@@ -28,7 +28,7 @@ public abstract class AbstractSqlParse implements SqlParse {
 
     protected final String columnSplit = ",";
     protected Map<String, String> tableAliaMap;
-    protected Stack<HashSet<String>> columnsStack;
+    protected Stack<HashSet<FieldSchema>> columnsStack;
     protected Stack<String> limitStack;
 
     protected boolean hasJoin;
@@ -36,23 +36,26 @@ public abstract class AbstractSqlParse implements SqlParse {
     protected String currentDb;
 
 
-    protected HashSet<String> splitColumn(Set<String> columns, Map<String, String> tableMap) {
-        return (HashSet<String>) columns.stream()
-                .flatMap(column -> Arrays.stream(column.split(columnSplit)))
-                .collect(Collectors.toSet())
-                .stream()
-                .map(column -> {
-                    if (column.contains(Constants.POINT)) {
-                        Pair<String, String> pair = StringUtils.getPointPair(column);
-                        String aDefault = tableMap.getOrDefault(pair.getLeft(), pair.getLeft());
-                        return aDefault + Constants.POINT + pair.getRight();
-                    }
-                    return column;
-                }).collect(Collectors.toSet());
+    protected HashSet<FieldSchema> splitColumn(Set<FieldSchema> columns, Map<String, String> tableMap) {
+        return (HashSet<FieldSchema>) columns;
+//        return (HashSet<String>) columns.stream()
+//                .flatMap(column -> Arrays.stream(column.getName().split(columnSplit)))
+//                .collect(Collectors.toSet())
+//                .stream()
+//                .map(column -> {
+//                    if (column.contains(Constants.POINT)) {
+//                        Pair<String, String> pair = StringUtils.getPointPair(column);
+//                        String aDefault = tableMap.getOrDefault(pair.getLeft(), pair.getLeft());
+//                        return aDefault + Constants.POINT + pair.getRight();
+//                    }
+//
+//                    return column;
+//
+//                }).collect(Collectors.toSet());
     }
 
 
-    protected HashSet<String> getColumnsTop() {
+    protected HashSet<FieldSchema> getColumnsTop() {
         if (columnsStack.isEmpty()) {
             return new HashSet<>(0);
         }
@@ -69,14 +72,20 @@ public abstract class AbstractSqlParse implements SqlParse {
 
 
     protected TableInfo buildTableInfo(String name, String db, OperatorType type) {
-        HashSet columns = (HashSet<FieldSchema>) splitColumn(getColumnsTop(), tableAliaMap).stream().map(c -> new FieldSchema(c, "string", "")).collect(Collectors.toSet());
+        HashSet columns = (HashSet<FieldSchema>) splitColumn(getColumnsTop(), tableAliaMap).stream().collect(Collectors.toSet());
         TableInfo info = new TableInfo(name, db, type, columns);
         info.setLimit(getLimitTop());
         return info;
     }
-
+    protected TableInfo buildTableInfo(String name, String db, OperatorType type,String comment) {
+        HashSet columns = (HashSet<FieldSchema>) splitColumn(getColumnsTop(), tableAliaMap).stream().collect(Collectors.toSet());
+        TableInfo info = new TableInfo(name, db, type, columns);
+        info.setTableComment(comment);
+        info.setLimit(getLimitTop());
+        return info;
+    }
     protected TableInfo buildTableInfo(String dbAndTable, OperatorType type) {
-        HashSet columns = (HashSet<FieldSchema>) splitColumn(getColumnsTop(), tableAliaMap).stream().map(c -> new FieldSchema(c, "string", "")).collect(Collectors.toSet());
+        HashSet columns = (HashSet<FieldSchema>) splitColumn(getColumnsTop(), tableAliaMap).stream().collect(Collectors.toSet());
         TableInfo info = new TableInfo(dbAndTable, type, currentDb, columns);
         info.setLimit(getLimitTop());
         return info;

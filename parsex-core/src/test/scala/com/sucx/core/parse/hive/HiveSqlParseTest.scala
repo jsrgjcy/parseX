@@ -1,6 +1,7 @@
 package com.sucx.core.parse.hive
 
-import com.sucx.core.SqlParseUtil
+import com.sucx.common.model.TableInfo
+import com.sucx.core.{SparkDDLSQLParse, SqlParseUtil}
 
 import scala.collection.JavaConversions.asScalaSet
 import scala.collection.immutable.ListSet
@@ -29,7 +30,7 @@ object HiveSqlParseTest {
     """
       |CREATE TABLE dws.dws_bt4075(
       |     FV STRING   COMMENT 'FV'
-      |    ,F1 STRING   COMMENT '日期'
+      |    ,F1 STRING   COMMENT '日期'  -- 日期注释
       |    ,F2 STRING   COMMENT '电池id'
       |    ,F3 STRING   COMMENT '起租状态'
       |    ,F4 STRING   COMMENT '当前所在事业部'
@@ -78,13 +79,14 @@ object HiveSqlParseTest {
   // 解析DDL
   def parseHiveDDLTest = {
     val UT = "20220101"
-    //    val path = "C:\\Persional\\workspace\\code\\cwp\\cwp-dwd\\src\\main\\resources\\lib\\ads\\ads_zk1080\\schema\\zk1080.sql"
-    //    val sql = Source.fromFile(path).mkString
+
     val sql = DDL_STR
-    val res = SqlParseUtil.parseHiveSql(sql.replaceAll("@ut@", UT))
-    println(res)
-//    res.getOutputSets.foreach(t =>
-//      t.getColumns.toList.sortBy(c => c.getName.replaceAll("F", "").toInt).map(println(_))
-//    )
+//    val res = SqlParseUtil.parseHiveSql(sql.replaceAll("@ut@", UT)).getOutputSets.toList
+
+    val res = new SparkDDLSQLParse().parseDDL(sql.replaceAll("@ut@", UT))
+    println(res.toString())
+
+
+
   }
 }

@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import scala.Tuple3;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +39,11 @@ public class SqlParseUtil {
     public static Result parseSparkSql(String sqlText) throws SqlParseException {
         return parse(SqlEnum.SPARK, sqlText);
     }
+
+//    public static List<TableInfo> parseSparkDDLSql(String sqlText) throws SqlParseException {
+//        getSqlParse(sqlEnum).parse(sqlText);
+//        return parse(SqlEnum.SPARK, sqlText);
+//    }
 
     /**
      * 解析sql入口

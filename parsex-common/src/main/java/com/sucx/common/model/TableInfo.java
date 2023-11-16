@@ -32,6 +32,8 @@ public class TableInfo {
 
     private Set<FieldSchema> columns;
 
+    private String tableComment;
+
     private String limit;
 
     private boolean selectAll;
@@ -133,9 +135,9 @@ public class TableInfo {
     public String toString() {
         StringBuilder str = new StringBuilder();
         if (isDb) {
-            str.append("[库]").append(dbName).append("[").append(type.name()).append("]");
+            str.append("[库]").append(dbName).append("[").append(type.name()).append("]").append("[comment]").append("[").append(getTableComment()).append("]");
         } else {
-            str.append("[表]").append(dbName).append(Constants.POINT).append(name).append("[").append(type.name()).append("]");
+            str.append("[表]").append(dbName).append(Constants.POINT).append(name).append("[").append(type.name()).append("]").append("[comment]").append("[").append(getTableComment()).append("]");
         }
 
         if (this.columns != null && this.columns.size() > 0) {
@@ -170,5 +172,13 @@ public class TableInfo {
             return this.dbName.hashCode() + this.name.hashCode() + this.type.hashCode();
         }
         return this.dbName.hashCode() + this.type.hashCode();
+    }
+
+    public String getTableComment() {
+        return tableComment;
+    }
+
+    public void setTableComment(String tableComment) {
+        this.tableComment = tableComment;
     }
 }

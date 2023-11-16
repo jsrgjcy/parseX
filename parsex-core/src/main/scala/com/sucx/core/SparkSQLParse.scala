@@ -166,9 +166,8 @@ class SparkSQLParse extends AbstractSqlParse {
         } else if (childInputTables.size() == 1) {
           val tableInfo: TableInfo = childInputTables.iterator().next()
           tableAliaMap.put(project.alias, tableInfo.getDbName + "." + tableInfo.getName)
-
           import scala.collection.JavaConverters._
-          val columns = splitColumn(tableInfo.getColumns.map(i => i.getName), tableAliaMap).asScala.map(c => new FieldSchema(c, "string", "")).toSet
+          val columns = splitColumn(tableInfo.getColumns, tableAliaMap).asScala.toSet
           tableInfo.setColumns(columns)
           inputTables.add(tableInfo)
         }
@@ -200,13 +199,15 @@ class SparkSQLParse extends AbstractSqlParse {
         if (project.query.isDefined) {
           resolveLogic(project.query.get, inputTables, outputTables, tmpTables)
         }
-        val columnsSet = new JSet[String]()
+        val columnsSet = new JSet[FieldSchema]()
+        println(project.toJSON)
+
         project.tableDesc.schema.fields.foreach(field => {
-          columnsSet.add(field.name)
+          columnsSet.add(new FieldSchema(field.name,field.dataType.typeName,field.getComment().get))
         })
         columnsStack.push(columnsSet)
         val tableIdentifier: TableIdentifier = project.tableDesc.identifier
-        outputTables.add(buildTableInfo(tableIdentifier.table, tableIdentifier.database.getOrElse(this.currentDb), OperatorType.CREATE))
+        outputTables.add(buildTableInfo(tableIdentifier.table, tableIdentifier.database.getOrElse(this.currentDb), OperatorType.CREATE,project.tableDesc.comment.get))
 
       case plan: GlobalLimit =>
         val project: GlobalLimit = plan.asInstanceOf[GlobalLimit]

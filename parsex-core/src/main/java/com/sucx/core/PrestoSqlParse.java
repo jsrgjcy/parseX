@@ -8,6 +8,7 @@ import com.sucx.common.Constants;
 import com.sucx.common.enums.OperatorType;
 import com.sucx.common.exceptions.SqlParseException;
 import com.sucx.common.model.TableInfo;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.log4j.Logger;
 import scala.Tuple3;
 
@@ -178,12 +179,14 @@ public class PrestoSqlParse extends AbstractSqlParse {
         } else if (node instanceof Select) {
             Select select = (Select) node;
             List<SelectItem> selectItems = select.getSelectItems();
-            HashSet<String> columns = new HashSet<>();
+            HashSet<FieldSchema> columns = new HashSet<>();
             for (SelectItem item : selectItems) {
                 if (item instanceof SingleColumn) {
-                    columns.add(getColumn(((SingleColumn) item).getExpression()));
+//                    getColumn(((SingleColumn) item).getExpression())
+                    columns.add(new FieldSchema(getColumn(((SingleColumn) item).getExpression()), "", ""));
                 } else if (item instanceof AllColumns) {
-                    columns.add(item.toString());
+//                    columns.add(item.toString());
+                    columns.add(new FieldSchema(item.toString(), "", ""));
                 } else {
                     throw new SqlParseException("unknow column type:" + item.getClass().getName());
                 }
