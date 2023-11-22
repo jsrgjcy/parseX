@@ -30,7 +30,7 @@ object HiveSqlParseTest {
     """
       |CREATE TABLE dws.dws_bt4075(
       |     FV STRING   COMMENT 'FV'
-      |    ,F1 STRING   COMMENT '日期'  -- 日期注释
+      |    ,F1 STRING   COMMENT '日期' -- 日期注释
       |    ,F2 STRING   COMMENT '电池id'
       |    ,F3 STRING   COMMENT '起租状态'
       |    ,F4 STRING   COMMENT '当前所在事业部'
@@ -78,15 +78,13 @@ object HiveSqlParseTest {
 
   // 解析DDL
   def parseHiveDDLTest = {
+
     val UT = "20220101"
-
     val sql = DDL_STR
-//    val res = SqlParseUtil.parseHiveSql(sql.replaceAll("@ut@", UT)).getOutputSets.toList
-
+    //    val res = SqlParseUtil.parseHiveSql(sql.replaceAll("@ut@", UT)).getOutputSets.toList
     val res = new SparkDDLSQLParse().parseDDL(sql.replaceAll("@ut@", UT))
+
     println(res.toString())
-
-
 
   }
 }

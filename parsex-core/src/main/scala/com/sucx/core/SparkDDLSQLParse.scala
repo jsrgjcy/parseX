@@ -1,22 +1,16 @@
 package com.sucx.core
 
-import java.util.{HashSet => JSet}
 import com.sucx.common.enums.OperatorType
 import com.sucx.common.model.TableInfo
 import org.apache.hadoop.hive.metastore.api.FieldSchema
 import org.apache.spark.sql.catalyst.TableIdentifier
-import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
-import org.apache.spark.sql.catalyst.catalog.UnresolvedCatalogRelation
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkSqlParser
-import org.apache.spark.sql.execution.command._
-import org.apache.spark.sql.execution.datasources.{CreateTable, RefreshTable}
+import org.apache.spark.sql.execution.datasources.CreateTable
 import org.apache.spark.sql.internal.SQLConf
 
-import java.util
+import java.util.{HashSet => JSet}
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ListBuffer
-import scala.collection.{immutable, mutable}
 
 class SparkDDLSQLParse extends AbstractSqlParse {
 
@@ -54,7 +48,7 @@ class SparkDDLSQLParse extends AbstractSqlParse {
         val ti = new TableInfo(tableIdentifier.table, tableIdentifier.database.getOrElse(this.currentDb), OperatorType.CREATE, columnsSet)
         ti.setTableComment(project.tableDesc.comment.get)
         ti
-      case _ => throw new Exception(" 不是DDL语句 ")
+      case _ => throw new Exception(" 不是DDL语句或语法错误 ")
     }
   }
 }

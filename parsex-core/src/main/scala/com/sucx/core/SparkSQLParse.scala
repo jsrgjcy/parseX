@@ -203,11 +203,11 @@ class SparkSQLParse extends AbstractSqlParse {
         println(project.toJSON)
 
         project.tableDesc.schema.fields.foreach(field => {
-          columnsSet.add(new FieldSchema(field.name,field.dataType.typeName,field.getComment().get))
+          columnsSet.add(new FieldSchema(field.name, field.dataType.typeName, field.getComment().get))
         })
         columnsStack.push(columnsSet)
         val tableIdentifier: TableIdentifier = project.tableDesc.identifier
-        outputTables.add(buildTableInfo(tableIdentifier.table, tableIdentifier.database.getOrElse(this.currentDb), OperatorType.CREATE,project.tableDesc.comment.get))
+        outputTables.add(buildTableInfo(tableIdentifier.table, tableIdentifier.database.getOrElse(this.currentDb), OperatorType.CREATE, project.tableDesc.comment.get))
 
       case plan: GlobalLimit =>
         val project: GlobalLimit = plan.asInstanceOf[GlobalLimit]
@@ -314,5 +314,30 @@ class SparkSQLParse extends AbstractSqlParse {
       case _ =>
     }
     this.resolveLogicPlan(logicalPlan)
+  }
+
+
+  /**
+   * 从DDL语句中解析表和字段信息
+   *
+   * @return
+   */
+  def parseDDLFromSQL(): TableInfo = {
+    return new TableInfo()
+  }
+
+
+  /**
+   * 从注释中解析表和字段信息
+   *
+   * @return
+   */
+  def parseDDLCommentFromAnnotate(sql: String): TableInfo = {
+    val res = sql.split("\r").map(l => {
+      val arr = l.split("--")
+      if (arr.length > 1) arr(1) else ""
+    })
+    println(res)
+    return new TableInfo()
   }
 }

@@ -56,7 +56,7 @@ public class TableInfo {
         this.dbName = dbName;
         this.type = type;
         this.columns = new HashSet<>(columns);
-        columns.clear();
+//        columns.clear();
         optimizeColumn();
     }
 
@@ -71,7 +71,7 @@ public class TableInfo {
         }
         this.columns = new HashSet<>(columns);
         this.type = type;
-        columns.clear();
+//        columns.clear();
         optimizeColumn();
     }
 
